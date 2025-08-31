@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>OpenLayers加载GeoServer WMS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.4.0/ol.css">
+  <style>
+    #map { width: 100%; height: 600px; }
+  </style>
+</head>
+<body>
+    <div style="margin-bottom:10px">
+      <form id="uploadForm" enctype="multipart/form-data">
+        <label>上传tif/shp文件：</label>
+        <input type="file" id="fileInput" name="file" multiple required accept=".tif,.tiff,.shp,.dbf,.shx,.prj,.cpg" />
+        <button type="submit">上传</button>
+      </form>
+    </div>
+    <div id="map"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ol@v7.4.0/dist/ol.js"></script>
+  <script>
+
+    // 卫星底图（Esri World Imagery，无需API Key）
+    const satelliteLayer = new ol.layer.Tile({
+      source: new ol.source.XYZ({
+        url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        maxZoom: 19,
+        crossOrigin: 'anonymous'
+      })
+    });
+
+    // GeoServer WMS叠加层
+    const wmsLayer = new ol.layer.Tile({
+      source: new ol.source.TileWMS({
+        url: 'http://localhost:8001/geoserver/gobi/wms',
+        params: {
+          'SERVICE': 'WMS',
+          'VERSION': '1.1.0',
+          'REQUEST': 'GetMap',
+          'LAYERS': 'gobi:2023_byhge-0000000000-0000000000_0_10',
+          'STYLES': '',
+          'FORMAT': 'image/png',
+          'SRS': 'EPSG:4326'
+        },
+        serverType: 'geoserver',
+        crossOrigin: 'anonymous'
+      })
+    });
+
+    const map = new ol.Map({
+      target: 'map',
+      layers: [satelliteLayer, wmsLayer],
+      view: new ol.View({
+        projection: 'EPSG:4326',
+        center: [(98.55075622267304 + 98.64274370776688) / 2, (47.648259637210835 + 47.74024712230467) / 2],
+        zoom: 12
+      })
+    });
+    // 文件上传逻辑
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData();
+      const files = document.getElementById('fileInput').files;
+      for (let i = 0; i < files.length; i++) {
+        formData.append('file', files[i]);
+      }
+      fetch('http://localhost:5000/upload', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.layerType && data.layerName) {
+          alert('上传成功，正在加载图层...');
+          // 动态添加新图层
+          if (data.layerType === 'raster') {
+            const newLayer = new ol.layer.Tile({
+              source: new ol.source.TileWMS({
+                url: data.wmsUrl,
+                params: {
+                  'LAYERS': data.layerName,
+                  'TILED': true
+                },
+                serverType: 'geoserver',
+                crossOrigin: 'anonymous'
+              })
+            });
+            map.addLayer(newLayer);
+          } else if (data.layerType === 'vector') {
+            const newLayer = new ol.layer.Tile({
+              source: new ol.source.TileWMS({
+                url: data.wmsUrl,
+                params: {
+                  'LAYERS': data.layerName,
+                  'TILED': true
+                },
+                serverType: 'geoserver',
+                crossOrigin: 'anonymous'
+              })
+            });
+            map.addLayer(newLayer);
+          }
+        } else {
+          alert('上传失败：' + (data.message || '未知错误'));
+        }
+      })
+      .catch(() => alert('上传失败，服务器无响应'));
+    });
+    // 图层管理控件
+    const layerSwitcherDiv = document.createElement('div');
+    layerSwitcherDiv.style.position = 'absolute';
+    layerSwitcherDiv.style.top = '10px';
+    layerSwitcherDiv.style.right = '10px';
+    layerSwitcherDiv.style.background = 'rgba(255,255,255,0.9)';
+    layerSwitcherDiv.style.padding = '10px';
+    layerSwitcherDiv.style.borderRadius = '6px';
+    layerSwitcherDiv.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+    layerSwitcherDiv.style.zIndex = 1000;
+
+    // 卫星底图开关
+    const satelliteCheckbox = document.createElement('input');
+    satelliteCheckbox.type = 'checkbox';
+    satelliteCheckbox.checked = true;
+    satelliteCheckbox.id = 'satelliteLayerCheckbox';
+    const satelliteLabel = document.createElement('label');
+    satelliteLabel.htmlFor = 'satelliteLayerCheckbox';
+    satelliteLabel.innerText = '卫星底图';
+    layerSwitcherDiv.appendChild(satelliteCheckbox);
+    layerSwitcherDiv.appendChild(satelliteLabel);
+    layerSwitcherDiv.appendChild(document.createElement('br'));
+
+    // WMS图层开关
+    const wmsCheckbox = document.createElement('input');
+    wmsCheckbox.type = 'checkbox';
+    wmsCheckbox.checked = true;
+    wmsCheckbox.id = 'wmsLayerCheckbox';
+    const wmsLabel = document.createElement('label');
+    wmsLabel.htmlFor = 'wmsLayerCheckbox';
+    wmsLabel.innerText = 'GeoServer图层';
+    layerSwitcherDiv.appendChild(wmsCheckbox);
+    layerSwitcherDiv.appendChild(wmsLabel);
+
+    document.body.appendChild(layerSwitcherDiv);
+
+    satelliteCheckbox.addEventListener('change', function() {
+      satelliteLayer.setVisible(this.checked);
+    });
+    wmsCheckbox.addEventListener('change', function() {
+      wmsLayer.setVisible(this.checked);
+    });
+  </script>
+</body>
+</html>
