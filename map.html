@@ -12,7 +12,7 @@
     <div style="margin-bottom:10px">
       <form id="uploadForm" enctype="multipart/form-data">
         <label>上传tif/shp文件：</label>
-        <input type="file" id="fileInput" name="file" multiple required accept=".tif,.tiff,.shp,.dbf,.shx,.prj,.cpg" />
+  <input type="file" id="fileInput" name="file" multiple required accept=".tif,.tiff,.zip" />
         <button type="submit">上传</button>
       </form>
     </div>
@@ -48,6 +48,7 @@
       })
     });
 
+    // 只允许鼠标中键拖动地图
     const map = new ol.Map({
       target: 'map',
       layers: [satelliteLayer, wmsLayer],
@@ -55,7 +56,8 @@
         projection: 'EPSG:4326',
         center: [(98.55075622267304 + 98.64274370776688) / 2, (47.648259637210835 + 47.74024712230467) / 2],
         zoom: 12
-      })
+      }),
+  interactions: []
     });
     // 文件上传逻辑
     document.getElementById('uploadForm').addEventListener('submit', function(e) {
@@ -69,43 +71,47 @@
         method: 'POST',
         body: formData
       })
-      .then(res => res.json())
+      .then(res => {
+        console.log('后端响应对象:', res);
+        return res.json();
+      })
       .then(data => {
+        console.log('后端响应内容:', data);
         if (data.success && data.layerType && data.layerName) {
-          alert('上传成功，正在加载图层...');
-          // 动态添加新图层
-          if (data.layerType === 'raster') {
-            const newLayer = new ol.layer.Tile({
-              source: new ol.source.TileWMS({
-                url: data.wmsUrl,
-                params: {
-                  'LAYERS': data.layerName,
-                  'TILED': true
-                },
-                serverType: 'geoserver',
-                crossOrigin: 'anonymous'
-              })
-            });
-            map.addLayer(newLayer);
-          } else if (data.layerType === 'vector') {
-            const newLayer = new ol.layer.Tile({
-              source: new ol.source.TileWMS({
-                url: data.wmsUrl,
-                params: {
-                  'LAYERS': data.layerName,
-                  'TILED': true
-                },
-                serverType: 'geoserver',
-                crossOrigin: 'anonymous'
-              })
-            });
-            map.addLayer(newLayer);
+          console.log('上传成功，正在加载图层...');
+          let wmsUrl = data.wmsUrl;
+          console.log('wmsUrl:', wmsUrl, 'layerName:', data.layerName);
+          if (wmsUrl.endsWith('/')) wmsUrl = wmsUrl.slice(0, -1);
+          if (!/\/wms$/.test(wmsUrl)) wmsUrl += '/wms';
+          const newLayer = new ol.layer.Tile({
+            source: new ol.source.TileWMS({
+              url: wmsUrl,
+              params: {
+                'LAYERS': data.layerName,
+                'TILED': true
+              },
+              serverType: 'geoserver',
+              crossOrigin: 'anonymous'
+            })
+          });
+          map.addLayer(newLayer);
+          // 自动缩放到新图层范围
+          if (data.bbox) {
+            const bbox = data.bbox;
+            // 支持latLonBoundingBox或nativeBoundingBox
+            let extent = [bbox.minx, bbox.miny, bbox.maxx, bbox.maxy];
+            console.log('自动缩放到bbox:', extent);
+            map.getView().fit(extent, {size: map.getSize(), padding: [20,20,20,20]});
           }
         } else {
-          alert('上传失败：' + (data.message || '未知错误'));
+          console.log('上传失败响应:', data);
+          console.log('上传失败：' + (data.message || '未知错误'));
         }
       })
-      .catch(() => alert('上传失败，服务器无响应'));
+      .catch((err) => {
+        console.log('上传异常:', err);
+        console.log('上传失败，服务器无响应');
+      });
     });
     // 图层管理控件
     const layerSwitcherDiv = document.createElement('div');
