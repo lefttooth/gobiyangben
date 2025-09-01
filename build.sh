@@ -1,0 +1,9 @@
+#!/bin/bash
+echo "正在安装依赖..."
+npm install
+
+echo "正在构建Vue应用..."
+npm run build
+
+echo "正在启动服务器..."
+python server.py

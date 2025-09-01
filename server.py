@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 import requests
 from flask_cors import CORS
@@ -11,10 +11,19 @@ GEOSERVER_USER = 'admin'
 GEOSERVER_PASSWORD = 'geoserver'
 GEOSERVER_WORKSPACE = 'gobi'  # 可根据实际情况修改
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='dist', static_url_path='')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 CORS(app)
+
+# 提供前端静态文件
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 # 允许的扩展名
 def allowed_file(filename):

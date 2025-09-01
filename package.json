@@ -1,0 +1,46 @@
+{
+  "name": "geoserver-vue-client",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "core-js": "^3.33.3",
+    "element-plus": "^2.4.3",
+    "ol": "^7.4.0",
+    "vue": "^3.3.9",
+    "vuedraggable": "^4.1.0",
+    "@vueuse/core": "^10.7.0",
+    "sortablejs": "^1.15.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~5.0.8",
+    "@vue/cli-plugin-eslint": "~5.0.8",
+    "@vue/cli-service": "~5.0.8",
+    "eslint": "^8.54.0",
+    "eslint-plugin-vue": "^9.18.1"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2020
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
