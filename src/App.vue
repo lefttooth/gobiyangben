@@ -2,37 +2,46 @@
 <template>
   <div class="app-container">
     <el-container>
-      <el-header height="auto">
-        <h2 class="app-title">GeoServer地理数据可视化应用</h2>
-        <file-uploader @layer-added="handleLayerAdded" />
-      </el-header>
-      <el-container>
-        <el-aside width="300px">
-          <layer-manager 
-            :layers="layers" 
-            @toggle-layer="toggleLayer"
-            @remove-layer="removeLayer"
-            @layer-opacity-change="changeLayerOpacity"
-            @layer-order-change="changeLayerOrder"
-          />
-        </el-aside>
-        <el-main>
-          <map-viewer 
-            ref="mapViewer" 
-            :layers="layers"
-          />
-          <div v-if="!hasNonBaseLayers" class="map-empty-overlay">
-            <el-empty 
-              description="暂无图层数据" 
-              :image-size="100"
-            >
-              <template #description>
-                <p>请通过上方上传功能添加地理数据</p>
-              </template>
-            </el-empty>
+      <el-aside width="350px">
+        <div class="sidebar-container">
+          <h2 class="app-title">地理数据可视化</h2>
+          
+          <!-- 上传组件 -->
+          <div class="sidebar-section">
+            <h3 class="section-title">数据上传</h3>
+            <file-uploader @layer-added="handleLayerAdded" />
           </div>
-        </el-main>
-      </el-container>
+          
+          <!-- 图层管理组件 -->
+          <div class="sidebar-section">
+            <h3 class="section-title">图层管理</h3>
+            <layer-manager 
+              :layers="layers" 
+              @toggle-layer="toggleLayer"
+              @remove-layer="removeLayer"
+              @layer-opacity-change="changeLayerOpacity"
+              @layer-order-change="changeLayerOrder"
+            />
+          </div>
+        </div>
+      </el-aside>
+      
+      <el-main>
+        <map-viewer 
+          ref="mapViewer" 
+          :layers="layers"
+        />
+        <div v-if="!hasNonBaseLayers" class="map-empty-overlay">
+          <el-empty 
+            description="暂无图层数据" 
+            :image-size="100"
+          >
+            <template #description>
+              <p>请通过左侧上传功能添加地理数据</p>
+            </template>
+          </el-empty>
+        </div>
+      </el-main>
     </el-container>
   </div>
 </template>
@@ -163,21 +172,38 @@ export default {
   height: 100%;
 }
 
-.el-header {
-  padding: 10px 20px;
-  background-color: #f5f7fa;
-  border-bottom: 1px solid #e6e6e6;
-}
-
 .app-title {
-  margin: 0 0 10px 0;
+  margin: 0 0 15px 0;
+  padding: 15px 0;
+  text-align: center;
+  border-bottom: 1px solid #e6e6e6;
 }
 
 .el-aside {
   background-color: #f5f7fa;
   border-right: 1px solid #e6e6e6;
-  padding: 10px;
+  padding: 0;
   overflow-y: auto;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-section {
+  padding: 10px 15px;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  font-size: 16px;
+  margin: 0 0 10px 0;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed #dcdfe6;
+  color: #409EFF;
 }
 
 .el-main {

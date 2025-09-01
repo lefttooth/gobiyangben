@@ -1,22 +1,7 @@
 <!-- eslint-disable -->
 <template>
   <div class="uploader-container">
-    <el-card class="uploader-card">
-      <template #header>
-        <div class="card-header">
-          <span>上传地理数据</span>
-        </div>
-      </template>
-      
-      <el-alert
-        title="请上传地理数据以显示图层"
-        type="info"
-        description="当前地图仅显示卫星底图，请上传 TIF 或 Shapefile(ZIP) 数据以添加新图层"
-        show-icon
-        :closable="false"
-        style="margin-bottom: 15px;"
-      />
-      
+    <el-card shadow="never" class="uploader-card">
       <el-upload
         class="upload-area"
         action="/api/upload"
@@ -28,7 +13,7 @@
         :on-error="handleError"
         :on-progress="handleProgress"
         :file-list="fileList"
-        :show-file-list="true"
+        :show-file-list="false"
         drag
       >
         <el-icon class="el-icon--upload"><upload-filled /></el-icon>
@@ -142,13 +127,8 @@ export default {
 }
 
 .uploader-card {
-  margin-bottom: 10px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  border: none !important;
+  background-color: transparent !important;
 }
 
 .upload-area {
@@ -163,9 +143,25 @@ export default {
   margin-top: 5px;
   text-align: center;
   color: #606266;
+  font-size: 12px;
 }
 
 :deep(.el-upload-dragger) {
   width: 100%;
+  padding: 30px 15px;
+  background-color: #f8fafc;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+}
+
+:deep(.el-upload-dragger:hover) {
+  border-color: #409eff;
+}
+
+.el-upload__tip {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 7px;
+  text-align: center;
 }
 </style>

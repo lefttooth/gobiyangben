@@ -1,8 +1,6 @@
 <!-- eslint-disable -->
 <template>
   <div class="layer-manager">
-    <h3>图层管理</h3>
-    
     <el-empty v-if="displayLayers.length === 0" description="暂无图层" />
     
     <div ref="layerListRef" class="layer-list">
@@ -137,28 +135,28 @@ export default {
   flex-direction: column;
 }
 
-h3 {
-  margin-top: 0;
-  margin-bottom: 15px;
-}
-
 .layer-list {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .layer-item {
   background-color: #fff;
   border-radius: 4px;
   padding: 10px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.layer-item:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .layer-header {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .drag-handle {
@@ -169,10 +167,11 @@ h3 {
 
 .layer-name {
   flex: 1;
-  margin: 0 10px;
+  margin: 0 8px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 13px;
 }
 
 .layer-controls {
@@ -181,14 +180,14 @@ h3 {
 }
 
 .opacity-label {
-  min-width: 60px;
+  min-width: 50px;
   font-size: 12px;
   color: #606266;
 }
 
 .el-slider {
   flex: 1;
-  margin-left: 10px;
+  margin-left: 8px;
 }
 
 .ghost {
@@ -198,5 +197,16 @@ h3 {
 
 .is-base-layer .drag-handle {
   display: none;
+}
+
+:deep(.el-switch) {
+  --el-switch-on-color: #409EFF;
+  --el-switch-off-color: #dcdfe6;
+}
+
+:deep(.el-button) {
+  --el-button-hover-text-color: #F56C6C;
+  --el-button-hover-bg-color: #fff;
+  --el-button-hover-border-color: #F56C6C;
 }
 </style>
